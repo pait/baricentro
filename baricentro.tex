@@ -1,0 +1,174 @@
+\documentclass{tufte-handout}
+
+%\geometry{showframe}% for debugging purposes -- displays the margins
+
+\usepackage{amsmath}
+\usepackage[portuges,brazil]{babel}
+\usepackage[utf8]{inputenc}
+
+% Set up the images/graphics package
+\usepackage{graphicx}
+\usepackage{MnSymbol}
+
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+\graphicspath{{graphics/}}
+
+%\title{Grandes livros, edição para engenharia}
+\author[F Pait]{F Pait}
+%\date{14 Novembro 2010}  % if the \date{} command is left out, the current date will be used
+
+% The following package makes prettier tables.  We're all about the bling!
+\usepackage{booktabs}
+
+% The units package provides nice, non-stacked fractions and better spacing
+% for units.
+\usepackage{units}
+
+\newenvironment{remark}{\mbox{} \newline \noindent \textbf{Remark:}\slshape \em}{\mbox{} \newline}
+\def\FAPESP{\textsc{fapesp}}
+\def\CNPq{\textsc{cnp}q}
+\def\d{\mathrm{d}}
+\def\qed{\hfill\rule{.1in}{.1in}}
+\def\e{\mathrm{e}}
+\def\dext{\mathrm{d}}
+\def\R{\mathbb{R}}
+\def\ricc{\mathcal{R}icc}
+\pagenumbering{arabic}
+\def\tr{{\rm trace \, }}
+\def\D{\mathrm{D}}
+\def\Lie{\mathcal{L}}
+
+\def\X{\mathcal{X}}
+\def\U{\mathcal{U}}
+\def\V{\mathcal{V}}
+\def\Y{\mathcal{Y}}
+\def\Z{\mathcal{Z}}
+\def\W{\mathcal{W}}
+\def\M{\mathcal{M}}
+
+\def\origin{\mathcal{O}}
+
+\def\xeq{x_\mathrm{eq}}
+\def\metric{\langle\enspace,\enspace\rangle}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+
+
+% The fancyvrb package lets us customize the formatting of verbatim
+% environments.  We use a slightly smaller font.
+\usepackage{fancyvrb}
+\fvset{fontsize=\normalsize}
+
+% Small sections of multiple columns
+\usepackage{multicol}
+
+% Provides paragraphs of dummy text
+\usepackage{lipsum}
+
+% These commands are used to pretty-print LaTeX commands
+\newcommand{\doccmd}[1]{\texttt{\textbackslash#1}}% command name -- adds backslash automatically
+\newcommand{\docopt}[1]{\ensuremath{\langle}\textrm{\textit{#1}}\ensuremath{\rangle}}% optional command argument
+\newcommand{\docarg}[1]{\textrm{\textit{#1}}}% (required) command argument
+\newenvironment{docspec}{\begin{quote}\noindent}{\end{quote}}% command specification environment
+\newcommand{\docenv}[1]{\textsf{#1}}% environment name
+\newcommand{\docpkg}[1]{\texttt{#1}}% package name
+\newcommand{\doccls}[1]{\texttt{#1}}% document class name
+\newcommand{\docclsopt}[1]{\texttt{#1}}% document class option name
+
+\begin{document}
+
+%\maketitle% this prints the handout title, author, and date
+
+%\begin{abstract}
+
+\section{Otimização direta}
+A busca de extremos de uma função $f: \X \rightarrow \R$, onde $\X$ é uma variedade diferenciável, é chamada otimização direta quando não conhecemos uma expressão para a função $f(x)$. Em seu lugar, dispomos de um oráculo, isto é, um método computacional ou procedimento experimental para avaliar o valor do custo $f$ correspondente a um dado $x$. Caso a informação fornecida se limite ao valor $f(x)$, temos um oráculo de ordem zero. Nesse caso trata-se de otimização livre de derivadas, a de maior interesse na presente discussão.  Um oráculo de ordem 1 fornece também as primeiras derivadas parciais $\partial f / \partial x^i$, a diferencial de $f$, um oráculo de ordem 2 a matriz Hessiana, e assim por diante. 
+
+Otimização direta, outrora desdenhada\cite{once-scorned}, é hoje uma área respeitável de pesquisa, tanto por suas aplicações práticas como pelos desafios científicos. Um texto recente \cite{derivative-free-book} serve como ponteiro para a literatura. 
+
+Pretendemos aplicar otimização direta a problemas de controle utilizando um algoritmo simples e intuitivo, que tem se mostrado bastante competitivo em testes preliminares. 
+
+\subsection{O algoritmo do baricentro} Considere um sequência de pontos de teste $x_i \in \R^n$ e uma correspondente sequência de pesos dados por $e^{-\nu f(x_i)}$, $\nu$ sendo uma constante real positiva apropriada. O centro de massa ou baricentro da distribuição de pesos resultante é o ponto $x\in \R^n$ que minimiza a soma das distâncias ponderadas 
+\begin{equation}
+\label{eq:sum-of-distances}
+\sum_i (x - x_i)^2 e^{-\nu f(x_i)},
+\end{equation}
+que admite a fórmula explícita
+\begin{equation}
+\label{eq:barycenter}
+\hat{x}_i = \frac{\sum_i x_i e^{-\nu f(x_i)}} {e^{-\nu f(x_i)}}.
+\end{equation}
+Alternativamente, a sequência de baricentros  pode ser computada usando a fórmula recursiva
+\begin{align}
+\label{eq:barycenter-recursive}
+m_i = & m_{i-1} + e^{-\nu f(x_i)}\\
+\hat{x}_i = & \frac{ x_i e^{-\nu f(x_i)}+ m_{i-1}\hat{x}_{i-i}} {m_i},
+\end{align}
+com $m(0)= 0$.
+
+O método do baricentro consiste em adotar $\hat{x}_i$ como a estimativa do ponto onde a função $f(x)$ é mínima. A intuição por trás dessa escolha é que os pontos da sequência $x_i$ onde o custo é alto tem peso pequeno e portanto contribuem pouco para a determinação do centro de massa, de forma que $x_i$ apresenta  tendência a se localizar nas vizinhanças dos pontos $x_i$ com valores relativamente baixos de $f(x_i)$.
+
+
+
+
+As aplicações que estamos estudando para o presente projeto são descritas a seguir.
+
+\section{Problema de Lur'e}
+
+Um  sistema dinâmico chaveado 
+\begin{equation}
+\label{eq:sys-set}
+\dot{x} =     a_{\sigma(t)}(x) 
+\end{equation}
+é estável para uma função de chaveamento $\sigma(t)$ arbitrária se e somente se existir uma função de Lyapunov comum para todos os campos de vetores do conjunto $\{a_i\}$, $i=1,\ldots,n$. 
+%
+Uma função de Lyapunov comum  $v$ para  os subsistemas
+\begin{equation}
+ \dot{x} =     a(x)
+  \end{equation} 
+  \label{eq:common-lyap}
+ por sua vez deve satisfazer
+ \begin{equation}
+\label{eqmax}
+\max_{i}(\Lie_{a_i} v) + \ell = 0
+\end{equation}
+com $\ell >0$. 
+
+No caso $n=2$, a equação parcial \eqref{eq:common-lyap} que deve ser resolvida para atacar esse problema foi tratada em \cite{cba2012} utilizando aproximações adequadas. Em geral, a minimização das derivadas direcionais conduz a problemas de otimização complexos que devem ser tratados com atenção especial à questão da diferenciabilidade. O método do baricentro produz pela própria natureza uma solução que será explorada computacionalmente para essa classe de problemas.
+
+
+
+
+\section{Controle preditivo e projeto randomizado}
+
+O controle preditivo consiste em projetar controladores utilizando técnicas de otimização numérica. Esses métodos permitem tratar diversas não-linearidades, entre as quais se destacam saturações, histereses, e zonas mortas,  são fenômenos ubíquos em processos industriais e de difícil abordagem usando técnicas de projeto mais explícitas tais como controladores linear.quadráticos. Esse fato é o responsável pelos sucessos do controle preditivo na prática industrial. 
+
+Para possibilitar o uso de técnicas de otimização  eficientes, o controle preditivo utiliza parametrizações do controle por realimentação em horizonte finito. Por um lado essas parametrizações permitem utilizar técnicas de otimização convexa modernas e eficazes. Por outro lado, o número de parâmetros a projetar tende a ser muito maior do que em modelos de controle que empregam realimentação de estado. Uma consequência dessa escolha é que não é fácil estabelecer a robustez de um sistema controlado usando controle preditivo.
+
+Uma técnica recente para projeto de controles robustos é o controle randomizado, em particular a técnica de cenários \cite{campi-garatti}
+
+[1] M. Campi, S. Garatti, M. Prandini, “The scenario approach for systems and control design”, Proceedings of the 17th IFAC world congress, Seoul, Korea, 2008.
+
+A essência da técnica consiste em considerar não o conjunto de todas as perturbações futuras possíveis, mas um número finito de cenários. Prova-se que se o número de cenários for suficientemente alto, então qualquer perturbação admissível está numa vizinhança pequena de algum dos cenários, com uma determinada probabilidade que pode ser feita tão alta como desejada através da escolha do número de cenários. Essa técnica de projeto estocástico é inovadora e promete bons resultados. 
+
+
+Um problema que permanece é a  dimensionalidade do problema de otimização, que é alta devido à parametrização do controlador por horizonte finito. Nossa proposta é empregar  métodos de otimização pelo baricentro em conjunto com parametrizações convencionais de controladores por realimentação de estado, que utilizam número reduzido de parâmetros. A robustez será obtida através das técnicas de cenários.
+
+
+
+\section{Controle adaptativo e estimação em variedades}
+
+Há 2 abordagens para o problema de controle adaptativo que podem se beneficiar da otimização direta pelo método do baricentro. Uma consiste em reparametrizar o fase de estimação de modo a evitar o problema da passagem pelo zero e da incompatibilidade entre as topologias de controle e de identificação paramétrica. O problema de estimação resultante se reduz a um filtro semelhante ao filtro de Kalman, porém formulado em uma variedade riemanniana. Trata-se de problema de estimação complexo e não resolvido na teoria, que porém pode se beneficiar do algoritmo do baricentro formulado em variedades.
+
+A outra é o projeto direto de controles lineares-quadráticos. Conforme descrito em \cite{design-direct}, é possível formular o   controle adaptativo direto como um problema de otimização usando a técnica conhecida do controle linear-quadrático. A desvantagem do procedimento é que o erro de identificação fica conhecido apenas em módulo, o que impossibilita o uso dos métodos tipo gradiente ou mínimos quadrados convencionais. Trata-se portanto de uma formulação ideal para o uso de técnicas de otimização direta usando baricentro. Nesse caso não é necessário trabalhar em variedades não euclideanas, o que facilita a busca de soluções numéricas para o problema.
+
+%\bibitem{design-direct}
+Felipe M Pait.
+On the design of direct adaptive controllers. \textsl{Conference on Decision and Control,} Orlando, Florida, \textsc{usa}, December 2001. \textsc{ieee} Control Systems Society.
+
+
+
+
+\end{document}
